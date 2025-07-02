@@ -1,0 +1,52 @@
+# ==========================
+# Common for both (React + Express)
+# ==========================
+node_modules/
+.env
+.env.local
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Editor-specific
+.vscode/
+.idea/
+
+# ==========================
+# React (frontend)
+# ==========================
+# Vite or Create React App build folder
+dist/
+build/
+
+# Local testing files
+*.local
+*.cache/
+coverage/
+.eslintcache
+
+# ==========================
+# Express (backend)
+# ==========================
+# Build output (if using TypeScript or Babel)
+dist/
+build/
+
+# Process manager files
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Logs
+logs/
+*.log
+log.txt
+
+# Debug output
+debug.log
