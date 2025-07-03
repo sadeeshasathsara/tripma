@@ -1,0 +1,110 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap');
+@import "tailwindcss";
+
+.font-nunito {
+    font-family: 'Nunito Sans', sans-serif;
+}
+
+/* Body Text Styles */
+.body-xl {
+    font-family: 'Nunito Sans', sans-serif;
+    font-size: 24px;
+    font-weight: 400;
+}
+
+.body-lg {
+    font-family: 'Nunito Sans', sans-serif;
+    font-size: 18px;
+    font-weight: 400;
+}
+
+.body-md {
+    font-family: 'Nunito Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+}
+
+.body-sm {
+    font-family: 'Nunito Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+}
+
+.body-xs {
+    font-family: 'Nunito Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 400;
+}
+
+/* Header / Footer Styles */
+.footer-header {
+    font-family: 'Nunito Sans', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.header-h1 {
+    font-family: 'Nunito Sans', sans-serif;
+    font-size: 36px;
+    font-weight: 600;
+}
+
+.header-h2 {
+    font-family: 'Nunito Sans', sans-serif;
+    font-size: 32px;
+    font-weight: 600;
+}
+
+.header-h3 {
+    font-family: 'Nunito Sans', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.header-h4 {
+    font-family: 'Nunito Sans', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.header-h5 {
+    font-family: 'Nunito Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.header-h6 {
+    font-family: 'Nunito Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* For WebKit-based browsers (Chrome, Safari, Edge) */
+.only-scrollbar-thumb::-webkit-scrollbar {
+    width: 8px;
+    /* or height for horizontal scroll */
+}
+
+.only-scrollbar-thumb::-webkit-scrollbar-track {
+    background: transparent;
+    /* hides the track */
+}
+
+.only-scrollbar-thumb::-webkit-scrollbar-button {
+    display: none;
+    /* hides the arrows */
+}
+
+.only-scrollbar-thumb::-webkit-scrollbar-thumb {
+    background-color: rgba(100, 100, 100, 0.5);
+    /* visible thumb */
+    border-radius: 4px;
+}
+
+/* For Firefox */
+.only-scrollbar-thumb {
+    scrollbar-width: thin;
+    /* makes it smaller */
+    scrollbar-color: #a0a0cd transparent;
+    /* thumb, then track */
+}
