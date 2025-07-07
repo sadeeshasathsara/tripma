@@ -4,8 +4,10 @@ import Navbar from '../../components/user/landingPage/navbar/Navbar'
 import Hero from '../../components/user/landingPage/hero/Hero'
 import Cookies from '../../components/user/cookies/Cookies'
 import SignUp from '../../components/user/login-signup/SignUp'
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import FlightDeals from '../../components/user/flights/FlightDeals'
+import XScrollContainer from '../../components/user/flights/XScrollContainer'
+import Reviews from '../../components/user/landingPage/reviews/Reviews'
+import TripmaFooter from '../../components/user/landingPage/footer/Footer'
 
 function LandingPage() {
 
@@ -15,29 +17,8 @@ function LandingPage() {
         setSignupStatus(status);
     }
 
-    const sendMessage = (message, type) => {
-        switch (type) {
-            case 'success':
-                toast.success(message)
-                break
-            case 'error':
-                toast.error(message)
-                break
-            case 'info':
-                toast.info(message)
-                break
-            case 'warning':
-                toast.warning(message)
-                break
-            default:
-                toast(message)
-                break
-        }
-    }
-
     return (
         <section className=''>
-            <ToastContainer position="top-center" autoClose={3000} />
 
             {/* Cookies Box */}
             <div className='w-full fixed bottom-0 px-3 py-2 z-50'>
@@ -51,7 +32,7 @@ function LandingPage() {
 
             <div className='relative'>
                 {/* Navbar */}
-                <div className='w-full absolute top-0'>
+                <div className='w-full absolute top-0 z-30'>
                     <Navbar onSignupChanged={handleSignupStatusChange} />
                 </div>
 
@@ -63,8 +44,23 @@ function LandingPage() {
 
             {/* Sign up Section */}
             <div className=''>
-                <SignUp status={signupStatus} onSignupChanged={handleSignupStatusChange} sendMessage={sendMessage} />
+                <SignUp status={signupStatus} onSignupChanged={handleSignupStatusChange} />
             </div>
+
+            {/* Sign up Section */}
+            <div className='w-full'>
+                <FlightDeals />
+            </div>
+
+            {/* Trips by category */}
+            <XScrollContainer tag={'Hiking'} />
+            <XScrollContainer tag={'Scenic Views'} />
+
+            {/* Reviews Section */}
+            <Reviews />
+
+            {/* Reviews Section */}
+            <TripmaFooter />
         </section>
     )
 }

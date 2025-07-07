@@ -52,7 +52,8 @@
 .header-h2 {
     font-family: 'Nunito Sans', sans-serif;
     font-size: 32px;
-    font-weight: 600;
+    font-weight: 700;
+    line-height: 30px;
 }
 
 .header-h3 {

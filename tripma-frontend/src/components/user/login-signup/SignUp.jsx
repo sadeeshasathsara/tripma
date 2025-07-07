@@ -5,12 +5,15 @@ import Facebook from '../../../assets/login-signup/facebook.svg';
 import Apple from '../../../assets/login-signup/apple_mac.svg';
 import { AnimatePresence, motion } from 'framer-motion';
 import SignupAPI from '../../../api/SignupApi';
+import { useToastProvider } from '../../../tools/ToastProvider';
 
-function SignUp({ status, onSignupChanged, sendMessage }) {
+function SignUp({ status, onSignupChanged }) {
     const [signupStatus, setSignupStatus] = React.useState(false);
     const [checkBox1, setCheckbox1] = React.useState(false);
     const [checkBox2, setCheckbox2] = React.useState(false);
     const [submiting, setSubmiting] = React.useState(false)
+
+    const { sendMessage } = useToastProvider()
 
     React.useEffect(() => {
         setSignupStatus(status);
@@ -142,7 +145,7 @@ function SignUp({ status, onSignupChanged, sendMessage }) {
                 <>
                     {/* Backdrop */}
                     <motion.div
-                        className="fixed inset-0 bg-[#52527A] bg-opacity-20 z-30"
+                        className="fixed inset-0 bg-[#52527A] bg-opacity-50 z-30"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 0.2 }}
                         exit={{ opacity: 0 }}
