@@ -1,19 +1,25 @@
 import React from 'react'
 import TripBookingModal from './TripBookingModal'
 
-function Trip({ trip, isOpen }) {
+function Trip({ trip, isOpen, isLoading = false }) {
     const [thumbnails, setThumbnails] = React.useState([])
     const [currentSlide, setCurrentSlide] = React.useState(0)
     const [isModalOpen, setIsModalOpen] = React.useState(false)
+    const [imagesLoaded, setImagesLoaded] = React.useState(false)
+    const [loadedImages, setLoadedImages] = React.useState(new Set())
 
     React.useEffect(() => {
         const getThumbnails = () => {
             const allThumbnails = trip.places.map((place) => place.thumbnail)
             setThumbnails(allThumbnails)
+            setImagesLoaded(false)
+            setLoadedImages(new Set())
         }
 
-        getThumbnails()
-    }, [trip])
+        if (trip && !isLoading) {
+            getThumbnails()
+        }
+    }, [trip, isLoading])
 
     React.useEffect(() => {
         if (isModalOpen) {
@@ -29,14 +35,28 @@ function Trip({ trip, isOpen }) {
 
     // Auto-advance slideshow
     React.useEffect(() => {
-        if (thumbnails.length > 1) {
+        if (thumbnails.length > 1 && imagesLoaded) {
             const interval = setInterval(() => {
                 setCurrentSlide((prev) => (prev + 1) % thumbnails.length)
             }, 4000)
 
             return () => clearInterval(interval)
         }
-    }, [thumbnails.length])
+    }, [thumbnails.length, imagesLoaded])
+
+    const handleImageLoad = (index) => {
+        setLoadedImages(prev => {
+            const newSet = new Set(prev)
+            newSet.add(index)
+
+            // Check if all images are loaded
+            if (newSet.size === thumbnails.length) {
+                setImagesLoaded(true)
+            }
+
+            return newSet
+        })
+    }
 
     const goToSlide = (index) => {
         setCurrentSlide(index)
@@ -50,33 +70,115 @@ function Trip({ trip, isOpen }) {
         setCurrentSlide((prev) => (prev + 1) % thumbnails.length)
     }
 
+    // Shimmer component
+    const Shimmer = ({ className = "" }) => (
+        <div className={`animate-pulse bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 bg-[length:200%_100%] ${className}`}
+            style={{
+                animation: 'shimmer 1.5s ease-in-out infinite',
+                backgroundImage: 'linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%)',
+                backgroundSize: '200% 100%'
+            }}>
+        </div>
+    )
 
+    // If loading, show shimmer version
+    if (isLoading) {
+        return (
+            <div className='md:min-w-[300px] h-full bg-white rounded-xl shadow-md overflow-hidden flex flex-col'>
+                <style jsx>{`
+                    @keyframes shimmer {
+                        0% { background-position: -200% 0; }
+                        100% { background-position: 200% 0; }
+                    }
+                `}</style>
 
+                {/* Image shimmer */}
+                <div className='relative h-40 sm:h-48 lg:h-52 overflow-hidden bg-gray-100 flex-shrink-0'>
+                    <Shimmer className="w-full h-full" />
+                </div>
+
+                {/* Content shimmer */}
+                <div className='p-4 sm:p-5 flex-1 flex flex-col'>
+                    {/* Title and Description shimmer */}
+                    <div className='mb-3 sm:mb-4 flex-shrink-0'>
+                        <Shimmer className="h-6 sm:h-7 w-3/4 mb-2 rounded" />
+                        <Shimmer className="h-4 w-full mb-1 rounded" />
+                        <Shimmer className="h-4 w-2/3 rounded" />
+                    </div>
+
+                    {/* Duration and Category shimmer */}
+                    <div className='mb-3 sm:mb-4 flex-shrink-0 h-4 sm:h-5'>
+                        <div className='flex items-center gap-3 sm:gap-4'>
+                            <Shimmer className="h-4 w-20 rounded" />
+                            <Shimmer className="h-4 w-16 rounded" />
+                        </div>
+                    </div>
+
+                    {/* Spacer */}
+                    <div className='flex-1'></div>
+
+                    {/* Price and Action shimmer */}
+                    <div className='flex items-center justify-between mb-3 flex-shrink-0 h-10 sm:h-12'>
+                        <div className='flex flex-col justify-center'>
+                            <Shimmer className="h-6 sm:h-8 w-16 mb-1 rounded" />
+                            <Shimmer className="h-3 w-12 rounded" />
+                        </div>
+                        <Shimmer className="h-8 sm:h-10 w-20 sm:w-24 rounded-lg" />
+                    </div>
+
+                    {/* Rating shimmer */}
+                    <div className='flex-shrink-0 h-6 sm:h-7 pt-2 sm:pt-3 border-t border-gray-100'>
+                        <div className='flex items-center gap-2'>
+                            <Shimmer className="h-4 w-24 rounded" />
+                            <Shimmer className="h-4 w-20 rounded" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        )
+    }
 
     return (
         <>
+            <style jsx>{`
+                @keyframes shimmer {
+                    0% { background-position: -200% 0; }
+                    100% { background-position: 200% 0; }
+                }
+            `}</style>
+
             <div className='md:min-w-[300px] h-full bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden group flex flex-col'>
                 {/* Image Section - Fixed height */}
                 <div className='relative h-40 sm:h-48 lg:h-52 overflow-hidden bg-gray-100 flex-shrink-0'>
                     {thumbnails.length > 0 ? (
                         <>
+                            {/* Show shimmer overlay while images are loading */}
+                            {!imagesLoaded && (
+                                <div className="absolute inset-0 z-10">
+                                    <Shimmer className="w-full h-full" />
+                                </div>
+                            )}
+
                             {/* Smooth sliding container */}
                             <div
-                                className='flex transition-transform duration-700 ease-in-out h-full'
+                                className={`flex transition-transform duration-700 ease-in-out h-full ${!imagesLoaded ? 'opacity-0' : 'opacity-100'}`}
                                 style={{ transform: `translateX(-${currentSlide * 100}%)` }}
                             >
                                 {thumbnails.map((thumbnail, index) => (
-                                    <img
-                                        key={index}
-                                        src={thumbnail}
-                                        alt={`${trip?.name || 'Trip'} - View ${index + 1}`}
-                                        className='w-full h-full object-cover flex-shrink-0'
-                                    />
+                                    <div key={index} className="relative w-full h-full flex-shrink-0">
+                                        <img
+                                            src={thumbnail}
+                                            alt={`${trip?.name || 'Trip'} - View ${index + 1}`}
+                                            className='w-full h-full object-cover'
+                                            onLoad={() => handleImageLoad(index)}
+                                            onError={() => handleImageLoad(index)} // Handle errors as loaded to prevent infinite loading
+                                        />
+                                    </div>
                                 ))}
                             </div>
 
-                            {/* Navigation arrows - smaller on mobile */}
-                            {thumbnails.length > 1 && (
+                            {/* Navigation arrows - only show when images are loaded */}
+                            {thumbnails.length > 1 && imagesLoaded && (
                                 <>
                                     <button
                                         onClick={goToPrevious}
@@ -97,8 +199,8 @@ function Trip({ trip, isOpen }) {
                                 </>
                             )}
 
-                            {/* Slide indicators - smaller dots */}
-                            {thumbnails.length > 1 && (
+                            {/* Slide indicators - only show when images are loaded */}
+                            {thumbnails.length > 1 && imagesLoaded && (
                                 <div className='absolute bottom-2 sm:bottom-3 left-1/2 transform -translate-x-1/2 flex space-x-1.5'>
                                     {thumbnails.map((_, index) => (
                                         <button
@@ -113,10 +215,12 @@ function Trip({ trip, isOpen }) {
                                 </div>
                             )}
 
-                            {/* Places count badge - smaller on mobile */}
-                            <div className='absolute top-2 sm:top-3 right-2 sm:right-3 bg-[#8455fd] bg-opacity-60 backdrop-blur-sm text-white px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium'>
-                                {thumbnails.length} {thumbnails.length === 1 ? 'place' : 'places'}
-                            </div>
+                            {/* Places count badge - only show when images are loaded */}
+                            {imagesLoaded && (
+                                <div className='absolute top-2 sm:top-3 right-2 sm:right-3 bg-[#8455fd] bg-opacity-60 backdrop-blur-sm text-white px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium'>
+                                    {thumbnails.length} {thumbnails.length === 1 ? 'place' : 'places'}
+                                </div>
+                            )}
                         </>
                     ) : (
                         <div className='w-full h-full flex flex-col items-center justify-center bg-gray-100'>
@@ -151,7 +255,7 @@ function Trip({ trip, isOpen }) {
                                         <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
-                                        <span>{trip.duration}</span>
+                                        <span>{`${trip.duration} hours flights`}</span>
                                     </div>
                                 )}
                                 {trip?.category && (
@@ -176,7 +280,6 @@ function Trip({ trip, isOpen }) {
                                 <span className='text-xl sm:text-2xl font-bold text-gray-900'>
                                     ${trip?.price || '0'}
                                 </span>
-
                             </div>
                             {trip?.originalPrice && trip.originalPrice > trip.price && (
                                 <span className='text-xs sm:text-sm text-gray-400 line-through'>
@@ -207,7 +310,7 @@ function Trip({ trip, isOpen }) {
                                     ))}
                                 </div>
                                 <span className='text-xs sm:text-sm text-gray-600'>
-                                    {trip.rating} ({trip.reviewCount || 0} reviews)
+                                    {trip.rating} ({(trip.reviews.length == 1) ? `${trip.reviews.length} review` : `${trip.reviews.length} reviews`})
                                 </span>
                             </div>
                         )}
@@ -222,4 +325,5 @@ function Trip({ trip, isOpen }) {
         </>
     )
 }
+
 export default Trip

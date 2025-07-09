@@ -53,8 +53,8 @@ function LandingPage() {
             </div>
 
             {/* Trips by category */}
-            <XScrollContainer tag={'Hiking'} />
-            <XScrollContainer tag={'Scenic Views'} />
+            <XScrollContainer tag={'deserted'} />
+            <XScrollContainer tag={'excellent'} />
 
             {/* Reviews Section */}
             <Reviews />

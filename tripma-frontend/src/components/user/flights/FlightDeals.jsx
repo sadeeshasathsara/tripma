@@ -2,16 +2,18 @@ import React from 'react'
 import { FaArrowRight } from "react-icons/fa6";
 import Trip from './Trip';
 import { sampleTrips } from '../../../tools/Tools';
+import { tripsBuffer } from '../../../tools/InitiateProcess';
+import TripsHandler from '../../../api/TripsHandler';
 
 function FlightDeals() {
 
     const [trips, setTrips] = React.useState([]);
 
     React.useEffect(() => {
-        if (sampleTrips) {
-            const selectedTrips = sampleTrips.slice(0, 3);
-            setTrips(selectedTrips);
-        }
+        TripsHandler.getInstance().getTrips()
+            .then(trips => {
+                setTrips(trips.slice(0, 3))
+            })
     }, []);
 
 

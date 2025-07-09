@@ -35,11 +35,12 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
+    "@faker-js/faker": "^9.9.0",
     "axios": "^1.10.0",
     "bcrypt": "^6.0.0",
     "body-parser": "^2.2.0",
-    "collections": "^5.1.13",
     "cors": "^2.8.5",
+    "datastructures-js": "^13.0.0",
     "dotenv": "^17.0.1",
     "express": "^5.1.0",
     "express-validator": "^7.2.1",

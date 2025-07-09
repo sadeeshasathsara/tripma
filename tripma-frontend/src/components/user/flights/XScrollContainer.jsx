@@ -2,6 +2,7 @@ import React from 'react'
 import Trip from './Trip'
 import { sampleTrips } from '../../../tools/Tools'
 import { FaArrowRight, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import TripsHandler from '../../../api/TripsHandler';
 
 function XScrollContainer({ tag }) {
 
@@ -9,6 +10,7 @@ function XScrollContainer({ tag }) {
     const scrollContainerRef = React.useRef(null)
     const [canScrollLeft, setCanScrollLeft] = React.useState(false)
     const [canScrollRight, setCanScrollRight] = React.useState(false)
+    const [isLoading, setIsLoading] = React.useState(true) // Start with true
 
     const tagTitles = {
         Adventure: "Thrill Seeker's Picks",
@@ -72,21 +74,39 @@ function XScrollContainer({ tag }) {
     }
 
     React.useEffect(() => {
-        function filterByCategory() {
-            if (sampleTrips) {
-                const filteredTrips = sampleTrips
-                    .filter(sampleTrip => sampleTrip.tags.includes(tag))
-                if (filteredTrips) setTrips(filteredTrips)
+        async function filterByCategory() {
+            try {
+                setIsLoading(true) // Set loading to true when starting to fetch
+                const trips = await TripsHandler.getInstance().getTrips();
+
+                const seenIds = new Set();
+                const filtered = [];
+
+                for (const trip of trips) {
+                    if (
+                        trip.tags.some(tagObj => tagObj.name === tag) &&
+                        !seenIds.has(trip._id)
+                    ) {
+                        seenIds.add(trip._id);
+                        filtered.push(trip);
+                    }
+                }
+
+                console.log(filtered);
+                setTrips(filtered);
+                setIsLoading(false) // Set loading to false after data is loaded
+            } catch (err) {
+                console.error("Error filtering trips:", err);
+                setIsLoading(false) // Set loading to false even on error
             }
         }
 
-        filterByCategory()
-
-    }, [tag])
+        filterByCategory();
+    }, [tag]);
 
     // Auto-scroll demonstration after component loads
     React.useEffect(() => {
-        if (trips && scrollContainerRef.current) {
+        if (trips && !isLoading && scrollContainerRef.current) {
             const timer1 = setTimeout(() => {
                 scrollContainerRef.current.scrollBy({
                     left: 135, // Scroll halfway to show it's scrollable
@@ -106,7 +126,7 @@ function XScrollContainer({ tag }) {
                 clearTimeout(timer2)
             }
         }
-    }, [trips])
+    }, [trips, isLoading])
 
     React.useEffect(() => {
         const container = scrollContainerRef.current
@@ -116,6 +136,30 @@ function XScrollContainer({ tag }) {
             return () => container.removeEventListener('scroll', checkScrollButtons)
         }
     }, [trips])
+
+    // Show loading shimmer cards while data is being fetched
+    if (isLoading) {
+        return (
+            <div className='mx-5 my-2 p-3 text-[#6E7491] flex flex-col gap-3 mt-5 bg-gradient-to-r from-white to-[#f3f8fe] rounded-lg border border-gray-200 shadow-sm'>
+                <div className='w-full flex items-center justify-between '>
+                    <div className='h-6 w-48 bg-gray-200 rounded animate-pulse'></div>
+                    <div className='h-8 w-16 bg-gray-200 rounded-full animate-pulse'></div>
+                </div>
+
+                <div className='relative'>
+                    <div className='w-full overflow-x-auto scrollbar-hide p-2'>
+                        <div className='flex flex-row gap-18'>
+                            {[...Array(4)].map((_, index) => (
+                                <div key={index} className='w-[250px] flex-shrink-0'>
+                                    <Trip trip={null} isLoading={true} />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        )
+    }
 
     return (
         <div className=''>
@@ -161,7 +205,7 @@ function XScrollContainer({ tag }) {
                             <div className='flex flex-row gap-18 '>
                                 {trips.map((trip, index) => (
                                     <div key={index} className='w-[250px] flex-shrink-0'>
-                                        <Trip trip={trip} />
+                                        <Trip trip={trip} isLoading={false} />
                                     </div>
                                 ))}
                             </div>

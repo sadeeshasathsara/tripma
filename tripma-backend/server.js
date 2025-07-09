@@ -4,6 +4,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import router from './src/routes/Routes.js'
 import ApiTesting from './src/api/test/apiTesting.js';
+import mongoose from 'mongoose';
 
 // Load environment variables from .env
 dotenv.config();
@@ -23,7 +24,17 @@ app.get('/', ApiTesting);
 app.use('/api', router);
 
 
-// Start server
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-});
+mongoose.connect(process.env.MONGO_URI)
+    .then(() => {
+        console.log("MongoDB Connected");
+
+
+        // Start server
+        app.listen(PORT, () => {
+            console.log(`Server is running on port ${PORT}`);
+        });
+
+    })
+    .catch((e) => {
+        console.log(`MongoDB connect error ${e.message}`);
+    }) 

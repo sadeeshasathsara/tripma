@@ -3,9 +3,11 @@ import './App.css'
 import LandingPage from './pages/user/LandingPage'
 import Location from './tools/Location'
 import { ToastProvider } from './tools/ToastProvider'
-import AboutUs from './components/user/about/AboutUs'
-import ContactUs from './components/user/contact/ContactUs'
 import SignIn from './components/user/login-signup/SignIn'
+import { tripsBuffer } from './tools/InitiateProcess'
+import AboutUsPage from './pages/user/AboutUsPage'
+import ContactUsPage from './pages/user/ContactUsPage'
+import TripsPage from './pages/user/TripsPage'
 
 function App() {
 
@@ -14,8 +16,9 @@ function App() {
       <Location />
       <Routes>
         <Route path='/' element={<LandingPage />} />
-        <Route path='/about' element={<AboutUs />} />
-        <Route path='/contact' element={<ContactUs />} />
+        <Route path='/about' element={<AboutUsPage />} />
+        <Route path='/contact' element={<ContactUsPage />} />
+        <Route path='/trips' element={<TripsPage />} />
         <Route path='/login' element={<SignIn />} />
       </Routes>
 
