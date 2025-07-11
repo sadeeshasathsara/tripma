@@ -5,6 +5,6 @@ const userRelationSchema = new mongoose.Schema({
     relations: [{
         userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
     }]
-});
+}, { timestamps: true });
 
 export default mongoose.model('UserRelation', userRelationSchema);

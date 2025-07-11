@@ -24,6 +24,6 @@ const userSchema = new mongoose.Schema({
     knownTravellerNumber: String,
     emergencyContacts: [String],
     bagsCount: Number
-});
+}, { timestamps: true });
 
 export default mongoose.model('User', userSchema);

@@ -14,6 +14,7 @@ class PlaceDTO {
     cover = null;
     gallery = [];
     tags = [];
+    createdAt = null;
 
     /**
      * Creates an instance of PlaceDTO from a Mongoose document or plain object.
@@ -42,6 +43,14 @@ class PlaceDTO {
         placeDoc.tags.map((tag) => {
             this.putTag(tag)
         })
+
+        if (placeDoc.createdAt) {
+            this.createdAt = placeDoc.createdAt;
+        } else if (placeDoc._id && typeof placeDoc._id.getTimestamp === 'function') {
+            this.createdAt = placeDoc._id.getTimestamp();
+        } else {
+            this.createdAt = null;
+        }
     }
 
     /**

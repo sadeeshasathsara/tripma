@@ -9,6 +9,6 @@ const airportSchema = new mongoose.Schema({
         latitude: Number,
         longitude: Number,
     }
-});
+}, { timestamps: true });
 
 export default mongoose.model('Airport', airportSchema);

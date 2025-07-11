@@ -7,7 +7,7 @@ class TagDTO {
     name = null;
     slug = null;
     type = null;
-
+    createdAt = null;
     /**
      * Constructs a TagDTO instance from a tag object or Mongoose document.
      *
@@ -22,6 +22,14 @@ class TagDTO {
         this.name = tagDoc.name ?? null;
         this.slug = tagDoc.slug ?? null;
         this.type = tagDoc.type ?? null;
+
+        if (tagDoc.createdAt) {
+            this.createdAt = tagDoc.createdAt;
+        } else if (tagDoc._id && typeof tagDoc._id.getTimestamp === 'function') {
+            this.createdAt = tagDoc._id.getTimestamp();
+        } else {
+            this.createdAt = null;
+        }
     }
 
     /**

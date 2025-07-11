@@ -16,6 +16,6 @@ const tripBookingSchema = new mongoose.Schema({
     totalAmount: Number,
     tripNotes: String,
     status: String
-});
+}, { timestamps: true });
 
 export default mongoose.model('TripBooking', tripBookingSchema);

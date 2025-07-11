@@ -31,7 +31,7 @@ const tripSchema = new mongoose.Schema({
             default: null
         }
     }]
-});
+}, { timestamps: true });
 
 const Trip = mongoose.model('Trip', tripSchema);
 export default Trip;

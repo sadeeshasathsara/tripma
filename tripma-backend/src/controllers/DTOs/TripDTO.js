@@ -14,6 +14,7 @@ class TripDTO {
     tags = [];
     places = [];
     reviews = [];
+    createdAt = null;
 
     /**
      * Constructs a TripDTO instance from a Mongoose Trip document or plain object.
@@ -35,6 +36,14 @@ class TripDTO {
         this.price = tripDoc.price ?? null;
         this.originalPrice = tripDoc.originalPrice ?? null;
         this.rating = tripDoc.rating.toFixed(1) ?? null;
+
+        if (tripDoc.createdAt) {
+            this.createdAt = tripDoc.createdAt;
+        } else if (tripDoc._id && typeof tripDoc._id.getTimestamp === 'function') {
+            this.createdAt = tripDoc._id.getTimestamp();
+        } else {
+            this.createdAt = null;
+        }
     }
 
     /**

@@ -6,6 +6,6 @@ const userAccountSchema = new mongoose.Schema({
     googleId: String,
     appleId: String,
     facebookId: String
-});
+}, { timestamps: true });
 
 export default mongoose.model('UserAccount', userAccountSchema);

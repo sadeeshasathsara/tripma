@@ -5,6 +5,7 @@ import Navbar from '../../components/user/landingPage/navbar/Navbar';
 import SignUp from '../../components/user/login-signup/SignUp';
 import TripmaFooter from '../../components/user/landingPage/footer/Footer';
 import HeroBannerSlider from '../../components/user/tripsPage/Banner';
+import TripsContainer from '../../components/user/tripsPage/TripsContainer';
 
 function TripsPage() {
     const [signupStatus, setSignupStatus] = React.useState(false);
@@ -38,6 +39,11 @@ function TripsPage() {
             {/* Add Banner Section */}
             <div>
                 <HeroBannerSlider />
+            </div>
+
+            {/* Add Banner Section */}
+            <div>
+                <TripsContainer />
             </div>
 
             {/* Reviews Section */}

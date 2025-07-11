@@ -8,6 +8,6 @@ const userFeedbackSchema = new mongoose.Schema({
   },
   feedback: String,
   stars: Number
-});
+}, { timestamps: true });
 
 export default mongoose.model('UserFeedback', userFeedbackSchema);

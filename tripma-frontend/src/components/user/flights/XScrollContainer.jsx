@@ -3,6 +3,7 @@ import Trip from './Trip'
 import { sampleTrips } from '../../../tools/Tools'
 import { FaArrowRight, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import TripsHandler from '../../../api/TripsHandler';
+import { Link } from 'react-router-dom';
 
 function XScrollContainer({ tag }) {
 
@@ -10,7 +11,7 @@ function XScrollContainer({ tag }) {
     const scrollContainerRef = React.useRef(null)
     const [canScrollLeft, setCanScrollLeft] = React.useState(false)
     const [canScrollRight, setCanScrollRight] = React.useState(false)
-    const [isLoading, setIsLoading] = React.useState(true) // Start with true
+    const [isLoading, setIsLoading] = React.useState(true)
 
     const tagTitles = {
         Adventure: "Thrill Seeker's Picks",
@@ -76,7 +77,7 @@ function XScrollContainer({ tag }) {
     React.useEffect(() => {
         async function filterByCategory() {
             try {
-                setIsLoading(true) // Set loading to true when starting to fetch
+                setIsLoading(true)
                 const trips = await TripsHandler.getInstance().getTrips();
 
                 const seenIds = new Set();
@@ -91,8 +92,6 @@ function XScrollContainer({ tag }) {
                         filtered.push(trip);
                     }
                 }
-
-                console.log(filtered);
                 setTrips(filtered);
                 setIsLoading(false) // Set loading to false after data is loaded
             } catch (err) {
@@ -168,10 +167,10 @@ function XScrollContainer({ tag }) {
 
                     <div className='w-full flex items-center justify-between '>
                         <p className='text-lg font-semibold text-[#6E7491]'>{tagTitles[tag] || `Trips tagged: ${tag}`}</p>
-                        <div className='flex items-center justify-center gap-1 cursor-pointer bg-white px-3 py-1.5 rounded-full border border-gray-200 hover:bg-gray-50 transition-colors duration-200'>
+                        <Link to='/trips' className='flex items-center justify-center gap-1 cursor-pointer bg-white px-3 py-1.5 rounded-full border border-gray-200 hover:bg-gray-50 transition-colors duration-200'>
                             <p className='text-[#A1B0CC] text-sm font-medium'>All</p>
                             <FaArrowRight size={12} color='#A1B0CC' />
-                        </div>
+                        </Link>
                     </div>
 
                     {/* Horizontal Scrollable Container with Navigation */}

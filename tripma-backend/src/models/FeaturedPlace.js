@@ -9,6 +9,6 @@ const featuredPlaceSchema = new mongoose.Schema({
         },
         main: { type: Boolean, default: false }
     }]
-});
+}, { timestamps: true });
 
 export default mongoose.model('FeaturedPlace', featuredPlaceSchema);

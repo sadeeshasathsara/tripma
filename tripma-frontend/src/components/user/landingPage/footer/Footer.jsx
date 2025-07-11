@@ -3,7 +3,7 @@ import { Facebook, Instagram, Twitter } from 'lucide-react';
 
 function TripmaFooter() {
     return (
-        <footer className="bg-gray-50 pt-4 px-4">
+        <footer className="bg-gray-50 pt-4 px-4 border border-t-[#e5e7eb]">
             <div className="max-w-7xl mx-auto">
                 {/* Main Footer Content */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-12">

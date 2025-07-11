@@ -61,10 +61,12 @@ const HeroBannerSlider = () => {
     return (
         <div className="relative w-full h-[50vh] sm:h-[80vh] overflow-hidden">
             {/* Background Image */}
-            <div
-                className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-all duration-1000 ease-in-out"
-                style={{ backgroundImage: `url(${currentBanner.banner})` }}
-            >
+            <div className="absolute inset-0 overflow-hidden transition-all duration-1000 ease-in-out">
+                <img
+                    src={currentBanner.banner}
+                    alt="Banner"
+                    className="w-full h-full object-cover absolute inset-0 transition-opacity duration-1000 ease-in-out"
+                />
                 {/* Overlay for better text readability */}
                 <div className="absolute inset-0 bg-black/40"></div>
             </div>

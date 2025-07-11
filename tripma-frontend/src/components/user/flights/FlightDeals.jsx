@@ -4,6 +4,7 @@ import Trip from './Trip';
 import { sampleTrips } from '../../../tools/Tools';
 import { tripsBuffer } from '../../../tools/InitiateProcess';
 import TripsHandler from '../../../api/TripsHandler';
+import { Link } from 'react-router-dom';
 
 function FlightDeals() {
 
@@ -22,10 +23,10 @@ function FlightDeals() {
 
             <div className='w-full flex items-center justify-between'>
                 <p className='text-lg'>Find your next adventure with these <span className='text-[#605DEC]'>Flight Deals</span></p>
-                <div className='flex items-center justify-center gap-1 cursor-pointer'>
+                <Link to='/trips' className='flex items-center justify-center gap-1 cursor-pointer'>
                     <p className='text-[#A1B0CC] text-md'>All</p>
                     <FaArrowRight size={14} color='#A1B0CC' />
-                </div>
+                </Link>
             </div>
 
 

@@ -36,9 +36,9 @@ function Navbar({ onSignupChanged }) {
         <div className="w-full flex items-center justify-between px-[24px]">
 
             {/* Logo */}
-            <div>
+            <Link to='/'>
                 <img src='./Logo.svg' alt='Tripma Logo' />
-            </div>
+            </Link>
 
             {/* Navigation Links */}
             <div className='p-[16px] grid grid-cols-5 gap-[16px] text-center items-center '>

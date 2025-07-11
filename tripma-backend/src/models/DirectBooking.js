@@ -26,6 +26,6 @@ const directBookingSchema = new mongoose.Schema({
     paymentMethod: String,
     transactionId: String,
     status: String
-});
+}, { timestamps: true });
 
 export default mongoose.model('DirectBooking', directBookingSchema);

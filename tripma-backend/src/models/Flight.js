@@ -21,6 +21,6 @@ const flightSchema = new mongoose.Schema({
     availableSeats: Number,
     ticketPrices: ticketPriceSchema,
     status: Boolean
-});
+}, { timestamps: true });
 
 export default mongoose.model('Flight', flightSchema);

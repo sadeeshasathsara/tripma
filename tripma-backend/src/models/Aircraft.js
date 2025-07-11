@@ -13,7 +13,7 @@ const aircraftSchema = new mongoose.Schema({
         economy: seatMapSchema,
         business: seatMapSchema,
         first: seatMapSchema
-    }
-});
+    },
+}, { timestamps: true });
 
 export default mongoose.model('Aircraft', aircraftSchema);

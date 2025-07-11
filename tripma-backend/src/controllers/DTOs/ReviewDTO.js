@@ -7,6 +7,7 @@ class ReviewDTO {
     country = null;
     feedback = null;
     stars = null;
+    createdAt = null;
 
     /**
      * Creates an instance of ReviewDTO using a UserFeedback document.
@@ -26,6 +27,14 @@ class ReviewDTO {
         this.country = user.address?.country ?? null;
         this.feedback = feedbackDoc.feedback ?? null;
         this.stars = feedbackDoc.stars ?? null;
+
+        if (feedbackDoc.createdAt) {
+            this.createdAt = feedbackDoc.createdAt;
+        } else if (feedbackDoc._id && typeof feedbackDoc._id.getTimestamp === 'function') {
+            this.createdAt = feedbackDoc._id.getTimestamp();
+        } else {
+            this.createdAt = null;
+        }
     }
 
     /**

@@ -13,6 +13,6 @@ const placeSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Tag'
     }],
-});
+}, { timestamps: true });
 
 export default mongoose.model('Place', placeSchema);
