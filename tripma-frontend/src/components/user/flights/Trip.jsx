@@ -85,7 +85,7 @@ function Trip({ trip, isOpen, isLoading = false }) {
     if (isLoading) {
         return (
             <div className='md:min-w-[300px] h-full bg-white rounded-xl shadow-md overflow-hidden flex flex-col'>
-                <style jsx>{`
+                <style jsx='true'>{`
                     @keyframes shimmer {
                         0% { background-position: -200% 0; }
                         100% { background-position: 200% 0; }

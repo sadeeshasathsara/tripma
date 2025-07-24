@@ -4,14 +4,22 @@ import Google from '../../../assets/login-signup/google.svg';
 import Facebook from '../../../assets/login-signup/facebook.svg';
 import Apple from '../../../assets/login-signup/apple_mac.svg';
 import { AnimatePresence, motion } from 'framer-motion';
-import SignupAPI from '../../../api/SignupApi';
 import { useToastProvider } from '../../../tools/ToastProvider';
+import { logInWithGoogleAPI, registerWithEmailAPI, registerWithGoogleAPI } from '../../../api/AuthAPI';
+import { useNavigate } from 'react-router-dom';
+import { GoogleLogin } from '@react-oauth/google';
+import { useDispatch } from 'react-redux';
+import { login } from '../../../redux/authSlice';
+import User from '../../../tools/User';
+import Cookies from 'js-cookie';
+import InitialUserAPI from '../../../api/UserAPI';
 
 function SignUp({ status, onSignupChanged }) {
     const [signupStatus, setSignupStatus] = React.useState(false);
     const [checkBox1, setCheckbox1] = React.useState(false);
     const [checkBox2, setCheckbox2] = React.useState(false);
-    const [submiting, setSubmiting] = React.useState(false)
+    const [submiting, setSubmiting] = React.useState(false);
+    const [profilePicturePreview, setProfilePicturePreview] = React.useState(null);
 
     const { sendMessage } = useToastProvider()
 
@@ -38,9 +46,11 @@ function SignUp({ status, onSignupChanged }) {
     }
 
     const [formData, setFormData] = React.useState({
+        firstName: '',
+        lastName: '',
         email: '',
-        phone: '',
         password: '',
+        profilePicture: null,
         termsAndConditions: checkBox1,
         dealAlerts: checkBox2,
     });
@@ -53,6 +63,20 @@ function SignUp({ status, onSignupChanged }) {
         })
     }, [checkBox1, checkBox2]);
 
+    const handleFirstNameChange = (e) => {
+        setFormData({
+            ...formData,
+            firstName: e.target.value
+        })
+    }
+
+    const handleLastNameChange = (e) => {
+        setFormData({
+            ...formData,
+            lastName: e.target.value
+        })
+    }
+
     const handlePasswordChange = (e) => {
         setFormData({
             ...formData,
@@ -60,14 +84,51 @@ function SignUp({ status, onSignupChanged }) {
         })
     }
 
-    const handleEmailOrPhoneChange = (e) => {
+    const handleEmailChange = (e) => {
         const value = e.target.value;
-        if (/^\d+$/.test(value)) {
-            // If the input is all digits, treat it as a phone number
-            setFormData({ ...formData, phone: value, email: '' });
-        } else {
-            // Otherwise, treat it as an email
-            setFormData({ ...formData, email: value, phone: '' });
+        setFormData({ ...formData, email: value });
+    }
+
+    const handleProfilePictureChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            // Validate file size (e.g., max 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                sendMessage('Profile picture must be less than 5MB', 'error');
+                return;
+            }
+
+            // Validate file type
+            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+            if (!allowedTypes.includes(file.type)) {
+                sendMessage('Please select a valid image file (JPEG, PNG, GIF, or WebP)', 'error');
+                return;
+            }
+
+            setFormData({
+                ...formData,
+                profilePicture: file
+            });
+
+            // Create preview
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                setProfilePicturePreview(e.target.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    const removeProfilePicture = () => {
+        setFormData({
+            ...formData,
+            profilePicture: null
+        });
+        setProfilePicturePreview(null);
+        // Reset the file input
+        const fileInput = document.getElementById('profile-picture');
+        if (fileInput) {
+            fileInput.value = '';
         }
     }
 
@@ -75,11 +136,12 @@ function SignUp({ status, onSignupChanged }) {
         e.preventDefault();
         if (isFormValid()) {
             setSubmiting(true)
-            const res = SignupAPI(formData)
-            if (res == true) {
-                sendMessage('Account has been successfully created.', 'success')
+            const res = await registerWithEmailAPI(formData)
+            if (res.success) {
+                setSignupStatus(false)
+                sendMessage(res.message, 'success')
             } else {
-                sendMessage(`Error: ${res.err}`, 'error')
+                sendMessage(`Error: ${res.message}`, 'error')
             }
             setSubmiting(false)
             handleClose()
@@ -87,7 +149,7 @@ function SignUp({ status, onSignupChanged }) {
     }
 
     const isFormValid = () => {
-        const { email, phone, password, termsAndConditions } = formData;
+        const { firstName, lastName, email, password, termsAndConditions } = formData;
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         const minLength = /.{8,}/;
         const uppercase = /[A-Z]/;
@@ -95,8 +157,16 @@ function SignUp({ status, onSignupChanged }) {
         const digit = /[0-9]/;
         const specialChar = /[!@#$%^&*(),.?":{}|<>]/;
 
-        if (!email && !phone) {
-            sendMessage('Please enter an email or phone number', 'error');
+        if (!firstName.trim()) {
+            sendMessage('Please enter your first name', 'error');
+            return false;
+        }
+        if (!lastName.trim()) {
+            sendMessage('Please enter your last name', 'error');
+            return false;
+        }
+        if (!email) {
+            sendMessage('Please enter an email', 'error');
             return false;
         }
         if (!password) {
@@ -109,10 +179,6 @@ function SignUp({ status, onSignupChanged }) {
         }
         if (email && !emailRegex.test(email)) {
             sendMessage('Please enter a valid email address.', 'error');
-            return false;
-        }
-        if (phone && phone.length < 10) {
-            sendMessage('Please enter a valid phone number.', 'error');
             return false;
         }
         if (!minLength.test(password)) {
@@ -139,6 +205,44 @@ function SignUp({ status, onSignupChanged }) {
         return true
     }
 
+    const navigate = useNavigate();
+    const dispatch = useDispatch()
+
+    const handleSuccess = async (credentialResponse) => {
+        const idToken = credentialResponse.credential;
+
+        try {
+            const res = await registerWithGoogleAPI(idToken)
+            if (res.success) {
+                sendMessage(res.message, "success");
+                const logRes = await logInWithGoogleAPI(idToken)
+                console.log(idToken);
+
+
+                if (logRes) {
+                    const userRes = InitialUserAPI()
+                    if (userRes.success) {
+                        dispatch(login(userRes.message))
+                    }
+                    setSignupStatus(false)
+                    navigate('/')
+                } else {
+                    sendMessage('Login Unsuccessfull', 'error')
+                }
+            } else {
+                sendMessage(res.message, "error");
+            }
+
+        } catch (err) {
+            const message = err.message || "Login failed";
+            sendMessage(message, "error");
+        }
+    };
+
+    const handleError = () => {
+        sendMessage("Google login failed", "error");
+    };
+
     return (
         <AnimatePresence>
             {signupStatus && (
@@ -155,7 +259,7 @@ function SignUp({ status, onSignupChanged }) {
                     {/* Modal */}
                     <motion.form
                         onSubmit={handleFormSubmit}
-                        className="absolute top-1/2 left-1/2 z-40 bg-[#fff] flex items-center justify-center flex-col gap-[12px] p-[50px] rounded-[12px] text-[#6E7491] shadow-md transform -translate-x-1/2 -translate-y-1/2 overflow-y-scroll only-scrollbar-thumb max-h-[90vh] w-[90%] max-w-[500px]"
+                        className="absolute top-1/2 left-1/2 z-40 bg-[#fff] flex items-center flex-col gap-[12px] px-[50px] py-[30px] rounded-[12px] text-[#6E7491] shadow-md transform -translate-x-1/2 -translate-y-1/2 overflow-y-scroll only-scrollbar-thumb max-h-[90vh] w-[90%] max-w-[500px]"
                         initial={{ opacity: 0, scale: 0.85 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.85 }}
@@ -169,12 +273,79 @@ function SignUp({ status, onSignupChanged }) {
                             <p>Tripma is totally free to use. Sign up using your email address or phone number below to get started.</p>
                         </div>
 
+                        {/* Profile Picture Section */}
+                        <div className="w-full flex flex-col items-center gap-3">
+                            <div className="flex items-center justify-center w-20 h-20 border-2 border-dashed border-[#A1B0CC] rounded-full bg-gray-50 relative overflow-hidden">
+                                {profilePicturePreview ? (
+                                    <img
+                                        src={profilePicturePreview}
+                                        alt="Profile preview"
+                                        className="w-full h-full object-cover"
+                                    />
+                                ) : (
+                                    <div className="text-center">
+                                        <div className="text-2xl text-[#A1B0CC] mb-1">👤</div>
+                                    </div>
+                                )}
+                            </div>
+                            <div className="flex gap-2">
+                                <label
+                                    htmlFor="profile-picture"
+                                    className="px-3 py-1 text-sm bg-[#605DEC] text-white rounded cursor-pointer hover:bg-[#4d4bea] transition-colors"
+                                >
+                                    {profilePicturePreview ? 'Change' : 'Upload'}
+                                </label>
+                                {profilePicturePreview && (
+                                    <button
+                                        type="button"
+                                        onClick={removeProfilePicture}
+                                        className="px-3 py-1 text-sm border border-[#A1B0CC] text-[#6E7491] rounded hover:bg-gray-50 transition-colors"
+                                    >
+                                        Remove
+                                    </button>
+                                )}
+                            </div>
+                            <input
+                                type="file"
+                                id="profile-picture"
+                                accept="image/*"
+                                onChange={handleProfilePictureChange}
+                                className="hidden"
+                            />
+                            <p className="text-xs text-[#A1B0CC] text-center">Optional: Upload a profile picture (max 5MB)</p>
+                        </div>
+
+                        {/* Name Fields */}
+                        <div className="w-full flex gap-3">
+                            <div className="flex-1">
+                                <input
+                                    type="text"
+                                    placeholder="First name"
+                                    name='firstName'
+                                    value={formData.firstName}
+                                    onChange={handleFirstNameChange}
+                                    className="border text-[#6E7491] border-[#A1B0CC] outline-[#8099c7] rounded-[4px] w-full p-2"
+                                />
+                            </div>
+                            <div className="flex-1">
+                                <input
+                                    type="text"
+                                    placeholder="Last name"
+                                    name='lastName'
+                                    value={formData.lastName}
+                                    onChange={handleLastNameChange}
+                                    className="border text-[#6E7491] border-[#A1B0CC] outline-[#8099c7] rounded-[4px] w-full p-2"
+                                />
+                            </div>
+                        </div>
+
                         <div className="w-full">
                             <input
                                 type="text"
-                                placeholder="Email or phone number"
-                                name='emailOrPhone'
-                                onChange={handleEmailOrPhoneChange}
+                                placeholder="Email address"
+                                name='email'
+                                value={formData.email}
+                                onChange={handleEmailChange}
                                 className="border text-[#6E7491] border-[#A1B0CC] outline-[#8099c7] rounded-[4px] w-full p-2"
                             />
                         </div>
@@ -184,6 +355,7 @@ function SignUp({ status, onSignupChanged }) {
                                 type="password"
                                 name='password'
                                 placeholder="Password"
+                                value={formData.password}
                                 onChange={handlePasswordChange}
                                 className="border text-[#6E7491] border-[#A1B0CC] outline-[#8099c7] rounded-[4px] w-full p-2"
                             />
@@ -206,7 +378,7 @@ function SignUp({ status, onSignupChanged }) {
                                     type="submit"
                                     className="w-full body-lg px-[20px] py-[12px] cursor-pointer hover:bg-[#4d4bea] rounded-[4px] bg-[#605DEC] text-white text-center"
                                 >
-                                    Create Acount
+                                    Create Account
                                 </button>
                             ) : (
                                 <button
@@ -227,10 +399,7 @@ function SignUp({ status, onSignupChanged }) {
                         </div>
 
                         <div className="flex flex-col gap-4 w-full">
-                            <div className="w-full flex items-center justify-center gap-2 border border-[#605DEC] text-[#605DEC] text-md rounded-[4px] px-[20px] py-[12px] hover:bg-[#605DEC] hover:text-white cursor-pointer hover:border-[#4e4beab3]">
-                                <img src={Google} alt="Google" className="h-5 w-5 object-contain" />
-                                <p>Continue with Google</p>
-                            </div>
+                            <GoogleLogin onSuccess={handleSuccess} onError={handleError} useOneTap />
 
                             <div className="w-full flex items-center justify-center gap-2 border border-[#605DEC] text-[#605DEC] text-md rounded-[4px] px-[20px] py-[12px] hover:bg-[#605DEC] hover:text-white cursor-pointer hover:border-[#4e4beab3]">
                                 <img src={Apple} alt="Apple" className="h-5 w-5 object-contain" />

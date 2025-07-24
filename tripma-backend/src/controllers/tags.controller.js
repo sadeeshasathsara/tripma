@@ -1,5 +1,4 @@
-import TagDTO from "./DTOs/TagDTO.js";
-import Tag from "../models/Tag.js";
+import TagDTO from "../DTOs/TagDTO.js";
 
 async function GetTags(req, res) {
     try {

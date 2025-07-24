@@ -172,7 +172,7 @@ function Reviews() {
                 </div>
             </div>
 
-            <style jsx>{`
+            <style jsx='true'>{`
                 @keyframes slideInUp {
                     from {
                         opacity: 0;

@@ -5,7 +5,9 @@ const userAccountSchema = new mongoose.Schema({
     password: String,
     googleId: String,
     appleId: String,
-    facebookId: String
+    facebookId: String,
+    dealAlerts: Boolean,
+    termsAndConditions: Boolean
 }, { timestamps: true });
 
 export default mongoose.model('UserAccount', userAccountSchema);

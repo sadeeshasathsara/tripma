@@ -4,10 +4,10 @@ import Tag from "../models/Tag.js";
 import UserFeedback from "../models/UserFeedback.js";
 import User from "../models/User.js";
 import { Queue } from "datastructures-js";
-import TripDTO from "../controllers/DTOs/TripDTO.js";
-import TagDTO from "../controllers/DTOs/TagDTO.js";
-import ReviewDTO from "../controllers/DTOs/ReviewDTO.js";
-import PlaceDTO from "../controllers/DTOs/PlaceDTO.js";
+import TripDTO from "../DTOs/TripDTO.js";
+import TagDTO from "../DTOs/TagDTO.js";
+import ReviewDTO from "../DTOs/ReviewDTO.js";
+import PlaceDTO from "../DTOs/PlaceDTO.js";
 
 /**
  * Service to fetch trips from the database and transform them into DTOs.

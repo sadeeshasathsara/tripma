@@ -5,6 +5,12 @@ import TripmaFooter from '../landingPage/footer/Footer';
 import Cookies from '../cookies/Cookies';
 import PromotionBanner from '../landingPage/promotions/PromotionBanner';
 import SignUp from './SignUp';
+import { loginWithEmail } from '../../../api/AuthAPI';
+import { useNavigate } from 'react-router-dom';
+import InitialUserAPI from '../../../api/UserAPI';
+import { useDispatch } from 'react-redux';
+import { useToastProvider } from '../../../tools/ToastProvider';
+import { login } from '../../../redux/authSlice';
 
 function SignIn() {
     const [signupStatus, setSignupStatus] = useState(false);
@@ -17,6 +23,8 @@ function SignIn() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errors, setErrors] = useState({});
     const [loginStatus, setLoginStatus] = useState(null);
+    const navigate = useNavigate()
+    const { sendMessage } = useToastProvider()
 
     const handleSignupStatusChange = (status) => {
         setSignupStatus(status);
@@ -57,6 +65,8 @@ function SignIn() {
         return Object.keys(newErrors).length === 0;
     };
 
+    const dispatch = useDispatch()
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -65,22 +75,32 @@ function SignIn() {
         setIsSubmitting(true);
         setLoginStatus(null);
 
-        // Simulate login process
-        setTimeout(() => {
-            // Simulate successful login
-            setLoginStatus('success');
-            setIsSubmitting(false);
+        try {
+            const res = await loginWithEmail(formData)
+            console.log('Login res:', res);
 
-            // Reset form after successful login
-            setTimeout(() => {
-                setFormData({
-                    email: '',
-                    password: '',
-                    rememberMe: false
-                });
-                setLoginStatus(null);
-            }, 2000);
-        }, 1500);
+            if (res.success) {
+                const userRes = await InitialUserAPI()
+                if (userRes.success) {
+                    dispatch(login(userRes.message))
+                    setLoginStatus('success');
+                    setIsSubmitting(false);
+                    setFormData({
+                        email: '',
+                        password: '',
+                        rememberMe: false
+                    });
+                    setLoginStatus(null);
+
+                    navigate('/')
+                }
+
+            } else {
+                sendMessage(res.message, 'error')
+            }
+        } catch (e) {
+            sendMessage(e.message, 'error')
+        }
     };
 
     const benefits = [

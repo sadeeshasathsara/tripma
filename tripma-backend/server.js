@@ -2,9 +2,12 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import router from './src/routes/Routes.js'
+import ApiRoutes from './src/routes/ApiRoutes.js'
+import AuthRoutes from './src/routes/AuthRoutes.js'
 import ApiTesting from './src/api/test/apiTesting.js';
 import mongoose from 'mongoose';
+import ErrorHandler from './src/middlewares/error_handler.middleware.js';
+import cookieParser from 'cookie-parser';
 
 // Load environment variables from .env
 dotenv.config();
@@ -18,10 +21,17 @@ app.use(cors({
     credentials: true
 }));
 app.use(express.json());
+app.use(cookieParser());
 
 //API Router
 app.get('/', ApiTesting);
-app.use('/api', router);
+app.use('/api', ApiRoutes);
+app.use('/api/auth', AuthRoutes)
+
+//Error handler route
+app.use(ErrorHandler)
+
+app.use('/uploads/profile_pictures', express.static('./src/uploads/profile_pictures'));
 
 
 mongoose.connect(process.env.MONGO_URI)

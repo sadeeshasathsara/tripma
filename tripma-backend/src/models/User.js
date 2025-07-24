@@ -9,6 +9,7 @@ const userSchema = new mongoose.Schema({
     firstName: String,
     middleName: String,
     lastName: String,
+    profilePic: String,
     suffix: String,
     type: { type: String, enum: ['adult', 'minor'] },
     dob: Date,

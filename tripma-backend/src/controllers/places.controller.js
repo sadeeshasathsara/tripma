@@ -1,4 +1,4 @@
-import PlaceDTO from "./DTOs/PlaceDTO.js";
+import PlaceDTO from "../DTOs/PlaceDTO.js";
 import Place from "../models/Place.js";
 
 async function GetPlaces(req, res) {
