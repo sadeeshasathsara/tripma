@@ -9,6 +9,7 @@ import AboutUsPage from './pages/user/AboutUsPage'
 import ContactUsPage from './pages/user/ContactUsPage'
 import TripsPage from './pages/user/TripsPage'
 import ProfilePage from './pages/user/ProfilePage'
+import FlightSearch from './pages/user/FlightsPage'
 
 function App() {
 
@@ -22,6 +23,7 @@ function App() {
         <Route path='/trips' element={<TripsPage />} />
         <Route path='/login' element={<SignIn />} />
         <Route path='/profile' element={<ProfilePage />} />
+        <Route path='/flight' element={<FlightSearch />} />
       </Routes>
 
     </ToastProvider>

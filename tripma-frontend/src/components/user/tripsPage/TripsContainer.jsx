@@ -15,6 +15,7 @@ function TripsContainer() {
     const [availablePlaces, setAvailablePlaces] = useState([]);
     const [tagSearchTerm, setTagSearchTerm] = useState('');
     const [placeSearchTerm, setPlaceSearchTerm] = useState('');
+    const [isInitialized, setIsInitialized] = useState(false);
 
     const [searchParameters, setSearchParameters] = useState({
         search: '',
@@ -40,12 +41,160 @@ function TripsContainer() {
         places: {}
     });
 
+    const LIMIT = 10;
+    const MIN_PRICE = 0;
+    const MAX_PRICE = 100000;
+
+    // Helper function to convert search parameters to URL search params
+    const searchParametersToURLParams = (params) => {
+        const urlParams = new URLSearchParams();
+
+        if (params.search) urlParams.set('search', params.search);
+        if (params.sortBy && params.sortBy !== 'choose') urlParams.set('sortBy', params.sortBy);
+
+        if (params.priceRange.min !== MIN_PRICE) urlParams.set('minPrice', params.priceRange.min.toString());
+        if (params.priceRange.max !== MAX_PRICE) urlParams.set('maxPrice', params.priceRange.max.toString());
+
+        // Flight hours
+        const selectedFlightHours = Object.keys(params.flightHours).filter(key => params.flightHours[key]);
+        if (selectedFlightHours.length > 0) {
+            urlParams.set('flightHours', selectedFlightHours.join(','));
+        }
+
+        // Ratings
+        const selectedRatings = Object.keys(params.ratings).filter(key => params.ratings[key]);
+        if (selectedRatings.length > 0) {
+            urlParams.set('ratings', selectedRatings.join(','));
+        }
+
+        // Tags
+        const selectedTags = Object.keys(params.tags).filter(key => params.tags[key]);
+        if (selectedTags.length > 0) {
+            urlParams.set('tags', selectedTags.join(','));
+        }
+
+        // Places
+        const selectedPlaces = Object.keys(params.places).filter(key => params.places[key]);
+        if (selectedPlaces.length > 0) {
+            urlParams.set('places', selectedPlaces.join(','));
+        }
+
+        return urlParams;
+    };
+
+    // Helper function to convert URL search params to search parameters
+    const urlParamsToSearchParameters = (urlParams, availableTags, availablePlaces) => {
+        const params = {
+            search: urlParams.get('search') || '',
+            sortBy: urlParams.get('sortBy') || 'choose',
+            priceRange: {
+                min: parseInt(urlParams.get('minPrice')) || MIN_PRICE,
+                max: parseInt(urlParams.get('maxPrice')) || MAX_PRICE
+            },
+            flightHours: {
+                0: false,
+                1: false,
+                2: false,
+                3: false
+            },
+            ratings: {
+                0: false,
+                1: false,
+                2: false,
+                3: false,
+                4: false
+            },
+            tags: {},
+            places: {}
+        };
+
+        // Initialize tags and places
+        availableTags.forEach(tag => {
+            params.tags[tag._id] = false;
+        });
+        availablePlaces.forEach(place => {
+            params.places[place._id] = false;
+        });
+
+        // Parse flight hours from URL
+        const flightHoursParam = urlParams.get('flightHours');
+        if (flightHoursParam) {
+            flightHoursParam.split(',').forEach(hour => {
+                if (params.flightHours.hasOwnProperty(hour)) {
+                    params.flightHours[hour] = true;
+                }
+            });
+        }
+
+        // Parse ratings from URL
+        const ratingsParam = urlParams.get('ratings');
+        if (ratingsParam) {
+            ratingsParam.split(',').forEach(rating => {
+                if (params.ratings.hasOwnProperty(rating)) {
+                    params.ratings[rating] = true;
+                }
+            });
+        }
+
+        // Parse tags from URL
+        const tagsParam = urlParams.get('tags');
+        if (tagsParam) {
+            tagsParam.split(',').forEach(tagId => {
+                if (params.tags.hasOwnProperty(tagId)) {
+                    params.tags[tagId] = true;
+                }
+            });
+        }
+
+        // Parse places from URL
+        const placesParam = urlParams.get('places');
+        if (placesParam) {
+            placesParam.split(',').forEach(placeId => {
+                if (params.places.hasOwnProperty(placeId)) {
+                    params.places[placeId] = true;
+                }
+            });
+        }
+
+        return params;
+    };
+
+    // Update URL when search parameters change
+    useEffect(() => {
+        if (!isInitialized) return; // Don't update URL during initial load
+
+        const urlParams = searchParametersToURLParams(searchParameters);
+        const newUrl = `${window.location.pathname}${urlParams.toString() ? '?' + urlParams.toString() : ''}`;
+
+        // Only update URL if it's different from current
+        if (window.location.href !== window.location.origin + newUrl) {
+            window.history.replaceState({}, '', newUrl);
+        }
+    }, [searchParameters, isInitialized]);
+
+    // Handle browser back/forward navigation
+    useEffect(() => {
+        const handlePopState = () => {
+            if (isInitialized && availableTags.length > 0 && availablePlaces.length > 0) {
+                const urlParams = new URLSearchParams(window.location.search);
+                const newSearchParams = urlParamsToSearchParameters(urlParams, availableTags, availablePlaces);
+                setSearchParameters(newSearchParams);
+            }
+        };
+
+        window.addEventListener('popstate', handlePopState);
+        return () => window.removeEventListener('popstate', handlePopState);
+    }, [isInitialized, availableTags, availablePlaces]);
+
+    // Fetch trips when search parameters change
     React.useEffect(() => {
+        if (!isInitialized) return; // Don't fetch during initial setup
+
         setTrips([]);
         setPage(0);
         setHasMore(false);
 
-        // 2) fetch new search results
+        // Fetch new search results
         async function updateTrips() {
             setIsLoading(true);
             try {
@@ -59,11 +208,7 @@ function TripsContainer() {
         }
 
         updateTrips();
-    }, [searchParameters]);
-
-    const LIMIT = 10;
-    const MIN_PRICE = 0;
-    const MAX_PRICE = 100000;
+    }, [searchParameters, isInitialized]);
 
     const observer = useRef();
 
@@ -81,6 +226,8 @@ function TripsContainer() {
     }, [isLoading, hasMore]);
 
     useEffect(() => {
+        if (!isInitialized) return; // Don't fetch more trips during initial setup
+
         const fetchTrips = async () => {
             setIsLoading(true);
             const data = await TripsHandler.getInstance().getTrips({ offset: page * LIMIT, limit: LIMIT });
@@ -90,10 +237,12 @@ function TripsContainer() {
             setIsLoading(false);
         };
 
-        fetchTrips();
-    }, [page]);
+        if (page > 0) { // Only fetch more trips if we're not on the first page
+            fetchTrips();
+        }
+    }, [page, isInitialized]);
 
-    // Fetch tags and places on component mount
+    // Fetch tags and places on component mount, then initialize from URL
     useEffect(() => {
         const fetchTagsAndPlaces = async () => {
             try {
@@ -105,23 +254,12 @@ function TripsContainer() {
                 setAvailableTags(tagsData || []);
                 setAvailablePlaces(placesData || []);
 
-                // Initialize tags and places in searchParameters
-                const initialTags = {};
-                const initialPlaces = {};
+                // Initialize search parameters from URL or defaults
+                const urlParams = new URLSearchParams(window.location.search);
+                const initialSearchParams = urlParamsToSearchParameters(urlParams, tagsData || [], placesData || []);
 
-                tagsData?.forEach(tag => {
-                    initialTags[tag._id] = false;
-                });
-
-                placesData?.forEach(place => {
-                    initialPlaces[place._id] = false;
-                });
-
-                setSearchParameters(prev => ({
-                    ...prev,
-                    tags: initialTags,
-                    places: initialPlaces
-                }));
+                setSearchParameters(initialSearchParams);
+                setIsInitialized(true);
             } catch (error) {
                 console.error('Error fetching tags and places:', error);
             }

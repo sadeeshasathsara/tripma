@@ -241,54 +241,7 @@ export const sampleTrips = [
 ]
 
 export const flightOptions = [
-    {
-        label: "Japan",
-        options: [
-            { value: "tokyo", label: "Tokyo" },
-            { value: "osaka", label: "Osaka" },
-            { value: "kyoto", label: "Kyoto" }
-        ]
-    },
-    {
-        label: "France",
-        options: [
-            { value: "paris", label: "Paris" },
-            { value: "lyon", label: "Lyon" },
-            { value: "nice", label: "Nice" }
-        ]
-    },
-    {
-        label: "United States",
-        options: [
-            { value: "new-york-city", label: "New York City" },
-            { value: "los-angeles", label: "Los Angeles" },
-            { value: "chicago", label: "Chicago" }
-        ]
-    },
-    {
-        label: "Canada",
-        options: [
-            { value: "vancouver", label: "Vancouver" },
-            { value: "toronto", label: "Toronto" },
-            { value: "montreal", label: "Montreal" }
-        ]
-    },
-    {
-        label: "United Kingdom",
-        options: [
-            { value: "london", label: "London" },
-            { value: "manchester", label: "Manchester" },
-            { value: "edinburgh", label: "Edinburgh" }
-        ]
-    },
-    {
-        label: "Australia",
-        options: [
-            { value: "sydney", label: "Sydney" },
-            { value: "melbourne", label: "Melbourne" },
-            { value: "brisbane", label: "Brisbane" }
-        ]
-    }
+
 ];
 
 

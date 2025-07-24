@@ -8,6 +8,7 @@ import ApiTesting from './src/api/test/apiTesting.js';
 import mongoose from 'mongoose';
 import ErrorHandler from './src/middlewares/error_handler.middleware.js';
 import cookieParser from 'cookie-parser';
+import { seedFlightsForYear } from './src/api/test/seedFlights.js';
 
 // Load environment variables from .env
 dotenv.config();

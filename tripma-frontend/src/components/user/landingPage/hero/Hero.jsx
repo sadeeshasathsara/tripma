@@ -11,6 +11,8 @@ import { flightOptions } from '../../../../tools/Tools';
 import DateRangePicker from '../../../../tools/DateRangePicker';
 import { FaMinus, FaP } from "react-icons/fa6";
 import { FaPlus } from "react-icons/fa6";
+import { fetchCityCodes } from '../../../../api/FetchCities';
+import { useNavigate } from 'react-router-dom';
 
 function Hero() {
 
@@ -18,6 +20,8 @@ function Hero() {
         depart: null,
         return: null
     })
+
+    const navigate = useNavigate();
 
     const [formData, setFormData] = React.useState({
         from: null,
@@ -43,10 +47,21 @@ function Hero() {
     const handleFormSubmit = (e) => {
         e.preventDefault();
 
-        console.log(formData);
+        const { from, to, tripDetails, seats } = formData;
 
+        const queryParams = new URLSearchParams({
+            from,
+            to,
+            type: tripDetails.type,
+            departDate: tripDetails.departDate,
+            returnDate: tripDetails.returnDate,
+            adults: seats.adults,
+            minors: seats.minors
+        });
 
-    }
+        navigate(`/flight?${queryParams.toString()}`);
+    };
+
 
     const recieveTripDetails = (tripDetails) => {
         const formatDate = (date) => date?.toISOString().split('T')[0];
@@ -125,6 +140,27 @@ function Hero() {
     }, [seats])
 
 
+    const [cityOptions, setCityOptions] = React.useState([]);
+
+    React.useEffect(() => {
+        const loadCityCodes = async () => {
+            try {
+                const res = await fetchCityCodes(0, 100); // or any suitable limit
+                const formattedOptions = res.data.map((airport) => ({
+
+                    label: airport.cityCode
+                }));
+                setCityOptions(formattedOptions);
+            } catch (err) {
+                console.error('Failed to load city codes:', err);
+            }
+        };
+
+        loadCityCodes();
+    }, []);
+
+
+
     return (
         <>
             <div onClick={closeAllModels} className="w-full h-[570px] flex items-center justify-center flex-col gap-4 bg-cover bg-no-repeat bg-center relative" style={{ backgroundImage: `url(${HeroImg})` }}>
@@ -139,19 +175,33 @@ function Hero() {
 
                             <div className='flex items-center justify-evenly gap-2 border-[#CBD4E6] '>
                                 <MdOutlineFlightTakeoff color='#6E7491' size={20} className='w-1/6 ' />
-                                <Select onChange={(selectedOption) =>
-                                    setFormData(prev => ({ ...prev, from: selectedOption?.value || '' }))
-                                } name='from' options={flightOptions} classNamePrefix="select" type='text' placeholder='From Where?' className='outline-0 text-[#6E7491] body-md w-5/6' />
+                                <Select
+                                    onChange={(selectedOption) =>
+                                        setFormData(prev => ({ ...prev, from: selectedOption?.label || '' }))
+                                    }
+                                    name='from'
+                                    options={cityOptions}
+                                    classNamePrefix="select"
+                                    placeholder='From Where?'
+                                    className='outline-0 text-[#6E7491] body-md w-5/6 z-50'
+                                />
                             </div>
 
                             <div className='flex items-center justify-evenly gap-2 border-[#CBD4E6]'>
                                 <MdOutlineFlightLand color='#6E7491' size={20} className='w-1/6 ' />
-                                <Select onChange={(selectedOption) =>
-                                    setFormData(prev => ({ ...prev, to: selectedOption?.value || '' }))
-                                } name='to' options={flightOptions} classNamePrefix="select" type='text' placeholder='To Where?' className='outline-0 text-[#6E7491] body-md w-5/6' />
+                                <Select
+                                    onChange={(selectedOption) =>
+                                        setFormData(prev => ({ ...prev, to: selectedOption?.label || '' }))
+                                    }
+                                    name='to'
+                                    options={cityOptions}
+                                    classNamePrefix="select"
+                                    placeholder='To Where?'
+                                    className='outline-0 text-[#6E7491] body-md w-5/6 z-40'
+                                />
                             </div>
 
-                            <div className='relative flex items-center justify-evenly gap-2 border-r border-[#CBD4E6]'>
+                            <div className='relative flex items-center justify-evenly gap-2 border-r border-[#CBD4E6] z-50'>
                                 <DateRangePicker recieveModelStatus={dateRangePickerModel} sendModelStatus={updateDateRangePickerModelStatus} sendTripDetails={recieveTripDetails} />
                             </div>
 
